@@ -7,12 +7,11 @@ class Devise::CredentialsController < DeviseController
 
   def new
     @credential = current_user.credentials.new
-    authorize(@credential)
 
     @create_options = WebAuthn::Credential.options_for_create(
       user: {
         id: current_user.webauthn_id,
-        name: current_user.name,
+        name: current_user.email,
       },
       # This prevents the credential being registered again
       # exclude: current_user.credentials.pluck(:external_id),
@@ -22,7 +21,6 @@ class Devise::CredentialsController < DeviseController
   end
 
   def create
-    policy_scope(Credential)
     webauthn_credential = WebAuthn::Credential.from_create(params)
     challenge = session["current_registration"]["challenge"]
 
@@ -52,16 +50,12 @@ class Devise::CredentialsController < DeviseController
   end
 
   def destroy
-    policy_scope(Credential)
     current_user.credentials.destroy(params[:id])
     redirect_to root_path
   end
 
   def check
-    scope = policy_scope(Credential)
-    authorize(scope)
-
-    ids = scope.limit(1).pluck(:external_id)
+    ids = current_user.credentials.pluck(:external_id)
     @check_options = WebAuthn::Credential.options_for_get(allow: ids)
 
     # Store the newly generated challenge somewhere so you can have it
@@ -70,12 +64,10 @@ class Devise::CredentialsController < DeviseController
   end
 
   def verify
-    scope = policy_scope(Credential)
-    authorize(scope)
     webauthn_credential = WebAuthn::Credential.from_get(params)
 
     # stored_credential = scope.find_by(external_id: webauthn_credential.id)
-    stored_credential = scope.find_by(external_id: Base64.strict_encode64(webauthn_credential.raw_id))
+    stored_credential = current_user.credentials.find_by(external_id: Base64.strict_encode64(webauthn_credential.raw_id))
     # stored_credential = scope.find_by(external_id: Base64.strict_encode64(webauthn_credential.raw_id))
 
     begin
