@@ -1,0 +1,4 @@
+mctester:
+  email: steve@mctester.localhost
+  # Password is "password"
+  encrypted_password: "$2a$12$pceh3m5h.IR30F2UnGhEmOZYkcHTK6Uf6sKKCoKz7wPWB.E4ly/Qu"
