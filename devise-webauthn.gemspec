@@ -9,9 +9,9 @@ Gem::Specification.new do |spec|
   spec.version = Devise::Webauthn::VERSION
   spec.authors = ["Max Brosnahan"]
   spec.email = ["maximilianbrosnahan@gmail.com"]
-  spec.homepage = "TODO"
-  spec.summary = "TODO: Summary of Devise::Webauthn."
-  spec.description = "TODO: Description of Devise::Webauthn."
+  spec.homepage = "https://github.com/gingermusketeer/devise-webauthn"
+  spec.summary = "Provides webauthn integration for Devise"
+  spec.description = "Webauthn based 2FA for Devise"
   spec.license = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
@@ -28,4 +28,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rails", "~> 6.0.3", ">= 6.0.3.4"
 
   spec.add_development_dependency "sqlite3"
+  spec.add_development_dependency "rspec-rails"
 end
