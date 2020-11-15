@@ -11,6 +11,14 @@ module Devise
           migration_template "migration.rb", "db/migrate/install_webauthn_for_#{table_name}.rb", migration_version: migration_version
         end
 
+        def inject_webauthn_content
+          path = File.join("app", "models", "#{singular_name}.rb")
+          if File.exists?(path)
+            inject_into_file(path, "has_many :credentials\n  ", before: "devise :")
+            inject_into_file(path, "webauthn_2f_authenticatable, :", after: "devise :")
+          end
+        end
+
         def migration_version
           "[#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}]"
         end

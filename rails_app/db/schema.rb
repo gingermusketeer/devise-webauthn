@@ -15,13 +15,13 @@ ActiveRecord::Schema.define(version: 2020_11_15_174631) do
   create_table "credentials", force: :cascade do |t|
     t.string "external_id", null: false
     t.string "public_key", null: false
-    t.integer "users_id", null: false
+    t.integer "user_id", null: false
     t.string "nickname", null: false
     t.bigint "sign_count", default: 0, null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["external_id"], name: "index_credentials_on_external_id", unique: true
-    t.index ["users_id"], name: "index_credentials_on_users_id"
+    t.index ["user_id"], name: "index_credentials_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -37,5 +37,5 @@ ActiveRecord::Schema.define(version: 2020_11_15_174631) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
-  add_foreign_key "credentials", "users", column: "users_id"
+  add_foreign_key "credentials", "users"
 end
