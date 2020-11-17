@@ -10,14 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_11_15_174631) do
+ActiveRecord::Schema.define(version: 2020_11_17_210754) do
 
   create_table "credentials", force: :cascade do |t|
     t.string "external_id", null: false
     t.string "public_key", null: false
     t.integer "user_id", null: false
     t.string "nickname", null: false
-    t.bigint "sign_count", default: 0, null: false
+    t.integer "sign_count", default: 0, null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["external_id"], name: "index_credentials_on_external_id", unique: true
@@ -33,6 +33,7 @@ ActiveRecord::Schema.define(version: 2020_11_15_174631) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "webauthn_id"
+    t.boolean "requires_two_factor_auth", default: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
