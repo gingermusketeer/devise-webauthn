@@ -1,20 +1,22 @@
 class Devise::CredentialsController < DeviseController
+  prepend_before_action :authenticate_scope!
+  before_action :ensure_resource_present
   # skip_before_action :verify_2fa!, only: [:check, :verify]
 
   def index
-    @credentials = current_user.credentials
+    @credentials = resource.credentials
   end
 
   def new
-    @credential = current_user.credentials.new
+    @credential = resource.credentials.new
 
     @create_options = WebAuthn::Credential.options_for_create(
       user: {
-        id: current_user.webauthn_id,
-        name: current_user.email,
+        id: resource.webauthn_id,
+        name: resource.email,
       },
       # This prevents the credential being registered again
-      # exclude: current_user.credentials.pluck(:external_id),
+      # exclude: resource.credentials.pluck(:external_id),
     )
     @challenge = @create_options.challenge
     session[:current_registration] = { challenge: @challenge }
@@ -26,7 +28,7 @@ class Devise::CredentialsController < DeviseController
 
     webauthn_credential.verify(challenge)
 
-    @credential = current_user.credentials.find_or_initialize_by(
+    @credential = resource.credentials.find_or_initialize_by(
       external_id: Base64.strict_encode64(webauthn_credential.raw_id),
     )
 
@@ -50,12 +52,12 @@ class Devise::CredentialsController < DeviseController
   end
 
   def destroy
-    current_user.credentials.destroy(params[:id])
+    resource.credentials.destroy(params[:id])
     redirect_to root_path
   end
 
   def check
-    ids = current_user.credentials.pluck(:external_id)
+    ids = resource.credentials.pluck(:external_id)
     @check_options = WebAuthn::Credential.options_for_get(allow: ids)
 
     # Store the newly generated challenge somewhere so you can have it
@@ -67,7 +69,7 @@ class Devise::CredentialsController < DeviseController
     webauthn_credential = WebAuthn::Credential.from_get(params)
 
     # stored_credential = scope.find_by(external_id: webauthn_credential.id)
-    stored_credential = current_user.credentials.find_by(external_id: Base64.strict_encode64(webauthn_credential.raw_id))
+    stored_credential = resource.credentials.find_by(external_id: Base64.strict_encode64(webauthn_credential.raw_id))
     # stored_credential = scope.find_by(external_id: Base64.strict_encode64(webauthn_credential.raw_id))
 
     begin
@@ -81,7 +83,7 @@ class Devise::CredentialsController < DeviseController
       stored_credential.update!(sign_count: webauthn_credential.sign_count)
 
       # Continue with successful sign in or 2FA verification...
-      session[:two_factor_checked_at] = Time.current
+      mark_2fa_checked(resource_name)
       redirect_to root_url
     rescue WebAuthn::SignCountVerificationError => e
       # Cryptographic verification of the authenticator data succeeded, but the signature counter was less then or equal
@@ -90,5 +92,15 @@ class Devise::CredentialsController < DeviseController
     rescue WebAuthn::Error => e
       # Handle error
     end
+  end
+
+  private
+
+  def authenticate_scope!
+    self.resource = send("current_#{resource_name}")
+  end
+
+  def ensure_resource_present
+    redirect_to :root if resource.nil?
   end
 end

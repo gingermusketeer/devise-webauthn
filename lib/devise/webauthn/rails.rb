@@ -3,7 +3,7 @@ module Devise
   module Webauthn
     class Engine < ::Rails::Engine
       ActiveSupport.on_load(:action_controller) do
-        # include TwoFactorAuthentication::Controllers::Helpers
+        include Devise::Webauthn::Controllers::Helpers
       end
     end
   end

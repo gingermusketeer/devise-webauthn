@@ -6,7 +6,11 @@ require "devise/routes"
 
 module Devise
   module Webauthn
-    # Your code goes here...
+    COOKIE_NAME = "devise_webauthn"
+
+    module Controllers
+      autoload :Helpers, "devise/webauthn/controllers/helpers"
+    end
   end
 end
 
